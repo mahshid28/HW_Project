@@ -28,4 +28,4 @@ This is a social media web application built using the Django web framework. It 
     You can view your profile page by clicking the "Profile" link in the navigation bar.
     You can edit your profile by clicking the "Edit profile" button on your profile page.
 
-![ER Diagram](/HW_Project/assets/ERD.png?raw=true "ERD")
+![ER Diagram](/assets/ERD.png?raw=true "ERD")
