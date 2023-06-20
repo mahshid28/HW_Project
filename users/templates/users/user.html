@@ -1,8 +1,96 @@
 <!DOCTYPE html>
 <html>
+<head>
+	<meta charset="UTF-8">
+	<title>Instagram Profile</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			margin: 0;
+			padding: 0;
+		}
+		header {
+			background-color: #967c978a;
+			border-bottom: 1px solid #9b819b;
+			height: 30px;
+			padding: 10px;
+			position: fixed;
+			top: 0;
+			width: 100%;
+			z-index: 1;
+		}
+		nav {
+			float: right;
+			margin-top: 10px;
+		}
+		nav ul {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+		}
+		nav li {
+			display: inline-block;
+			margin-right: 20px;
+		}
+		nav a {
+			color: #210122;
+			text-decoration: none;
+		}
+		nav a:hover {
+			color: #000;
+		}
+		.container {
+			max-width: 200px;
+			padding: 10px;
+			width: 100%;
+	}
+		.profile {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+		.profile img {
+			border-radius: 50%;
+			height: 70px;
+            margin-top: 80px;
+			width: 100px;
+		}
+		.profile h2 {
+			margin-bottom: 20px;
+		}
+		.profile p {
+			margin-bottom: 10px;
+			text-align: center;
+			width: 70%;
+		}
+		.grid {
+			display: grid;
+			grid-gap: 20px;
+			grid-template-columns: repeat(3, 1fr);
+			margin-top: 20px;
+		}
+		.grid img {
+			max-width: 100%;
+		}
+	</style>
+</head>
 <body>
-
-<h1>It's profile page</h1>
-
+	<header>
+		<div class="container">
+			<nav>
+				<ul>
+					<li><a href="/">Home</a></li>
+					<li><a href="#">Reactions</a></li>
+				</ul>
+			</nav>
+		</div>
+	</header>
+	<div class="container">
+		<div class="profile">
+			<img src="https://www.example.com/profile-picture.jpg" alt="Profile Picture">
+			<h2>Username</h2>
+			<p>Bio goes here.</p>
+		</div>
+	</div>
 </body>
-</html> 
+</html>
