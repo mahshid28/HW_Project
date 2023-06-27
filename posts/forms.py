@@ -3,9 +3,13 @@ from .models import Post, Comment
 
 
 class PostCreateUpdateForm(forms.ModelForm):
+	image = forms.ImageField(required=False)
 	class Meta:
 		model = Post
-		fields = ('content',)
+		fields = ('content', 'image')
+		widgets = {
+            'content': forms.Textarea(attrs={'class': 'form-control'}),
+        }
 
 
 class CommentCreateForm(forms.ModelForm):

@@ -6,7 +6,7 @@ from django.utils import timezone
 
 class Post(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
-    content = models.TextField(_("Content"), max_length=1000)
+    content = models.TextField(_("Content"), max_length=1000, help_text="the caption of your post")
     slug = models.SlugField()
     title = models.CharField(max_length=100, null=True, blank=True)
     created_at = models.DateTimeField(_("Created time"), auto_now_add=True)
@@ -36,7 +36,7 @@ class Post(BaseModel):
 class Comment(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     related_post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    content = models.TextField(_("Content"), max_length=500, blank=True, null=True)
+    content = models.TextField(_("Content"), max_length=500, blank=True, null=True, help_text="share your opinion")
     reply_to = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
     is_reply = models.BooleanField(default=False)
     created_at = models.DateTimeField(_("Created time"), auto_now_add=True)

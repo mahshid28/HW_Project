@@ -101,9 +101,13 @@ class PostCreateView(LoginRequiredMixin, View):
 			new_post.slug = slugify(form.cleaned_data['content'][:30])
 			new_post.user = request.user
 			new_post.save()
+			if form.cleaned_data.get('image'):
+				for image in request.FILES.getlist('image'):
+					PostImage.objects.create(post=new_post, image=image)
+
 			messages.success(request, 'you created a new post', 'success')
 			return redirect('home:post_detail', new_post.id, new_post.slug)
-
+		return render(request, 'home/create.html', {'form':form})
 
 class PostAddReplyView(LoginRequiredMixin, View):
 	form_class = CommentReplyForm

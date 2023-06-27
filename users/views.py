@@ -80,26 +80,26 @@ class UserProfileView(LoginRequiredMixin, View):
 		relation = Relation.objects.filter(from_user=request.user, to_user=user)
 		if relation.exists():
 			is_following = True
-		return render(request, 'usres/profile.html', {'user':user, 'posts':posts, 'is_following':is_following})
+		return render(request, 'users/user.html', {'user':user, 'posts':posts, 'is_following':is_following})
 
 
 class UserPasswordResetView(auth_views.PasswordResetView):
-	template_name = 'usres/password_reset_form.html'
-	success_url = reverse_lazy('usres:password_reset_done')
-	email_template_name = 'usres/password_reset_email.html'
+	template_name = 'users/password_reset_form.html'
+	success_url = reverse_lazy('users:password_reset_done')
+	email_template_name = 'users/password_reset_email.html'
 
 
 class UserPasswordResetDoneView(auth_views.PasswordResetDoneView):
-	template_name = 'usres/password_reset_done.html'
+	template_name = 'users/password_reset_done.html'
 
 
 class UserPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
-	template_name = 'usres/password_reset_confirm.html'
-	success_url = reverse_lazy('usres:password_reset_complete')
+	template_name = 'users/password_reset_confirm.html'
+	success_url = reverse_lazy('users:password_reset_complete')
 
 
 class UserPasswordResetCompleteView(auth_views.PasswordResetCompleteView):
-	template_name = 'usres/password_reset_complete.html'
+	template_name = 'users/password_reset_complete.html'
 
 
 class UserFollowView(LoginRequiredMixin, View):
@@ -109,7 +109,7 @@ class UserFollowView(LoginRequiredMixin, View):
 			return super().dispatch(request, *args, **kwargs)
 		else:
 			messages.error(request,'you cant follow/unfollow your account','danger')
-			return redirect('usres:user_profile',user.id)
+			return redirect('users:user_profile',user.id)
 
 	def get(self, request, user_id):
 		user = User.objects.get(id=user_id)
@@ -119,7 +119,7 @@ class UserFollowView(LoginRequiredMixin, View):
 		else:
 			Relation(from_user=request.user, to_user=user).save()
 			messages.success(request, 'you followed this user', 'success')
-		return redirect('usres:user_profile', user.id)
+		return redirect('users:user_profile', user.id)
 
 
 class UserUnfollowView(LoginRequiredMixin, View):
@@ -129,7 +129,7 @@ class UserUnfollowView(LoginRequiredMixin, View):
 			return super().dispatch(request, *args, **kwargs)
 		else:
 			messages.error(request,'you cant follow/unfollow your account','danger')
-			return redirect('usres:user_profile',user.id)
+			return redirect('users:user_profile',user.id)
 	
 	def get(self, request, user_id):
 		user = User.objects.get(id=user_id)
@@ -139,7 +139,7 @@ class UserUnfollowView(LoginRequiredMixin, View):
 			messages.success(request, 'you unfollowed this user', 'success')
 		else:
 			messages.error(request, 'you are not following this user', 'danger')
-		return redirect('usres:user_profile', user.id)
+		return redirect('users:user_profile', user.id)
 
 
 class EditUserView(LoginRequiredMixin, View):
@@ -147,7 +147,7 @@ class EditUserView(LoginRequiredMixin, View):
 
 	def get(self, request):
 		form = self.form_class(instance=request.user.profile, initial={'email':request.user.email})
-		return render(request, 'usres/edit_profile.html', {'form':form})
+		return render(request, 'users/edit_profile.html', {'form':form})
 
 	def post(self, request):
 		form = self.form_class(request.POST, instance=request.user.profile)
@@ -156,4 +156,4 @@ class EditUserView(LoginRequiredMixin, View):
 			request.user.email = form.cleaned_data['email']
 			request.user.save()
 			messages.success(request, 'profile edited successfully', 'success')
-		return redirect('usres:user_profile', request.user.id)
+		return redirect('users:user_profile', request.user.id)

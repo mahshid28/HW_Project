@@ -6,7 +6,7 @@ from django.utils.translation import gettext as _
 
 class Profile(BaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    bio = models.CharField(_("Bio"), max_length=300, blank=True)
+    bio = models.CharField(_("Bio"), max_length=300, blank=True, help_text="extra info about you that shows in your profile")
     phone_number = models.CharField(_("Phone_number"), max_length=11, blank=True)
 
     class Meta:
@@ -22,7 +22,8 @@ class Relation(BaseModel):
     updated_at = models.DateTimeField(_("Updated time"), auto_now=True)
 
     class Meta:
-        verbose_name = _('Profile')
+        ordering = ['-created_at']
+        unique_together = ('from_user', 'to_user')
 
     def __str__(self):
         return f'{self.user.username} Profile'
