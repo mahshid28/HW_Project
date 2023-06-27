@@ -9,7 +9,7 @@ class BaseModel(models.Model):
         abstract = True
 
 class MyManager(models.Manager):
-    def get_queryset(self) -> QuerySet:
+    def get_queryset(self):
         return super().get_queryset().filter(is_deleted=False)
 
 
