@@ -1,28 +1,46 @@
 from django.db import models
 from django.contrib.auth.models import User
-from core.models import BaseModel, TimeStampMixin
+from core.models import BaseModel
 from django.utils.translation import gettext as _
 from django.utils import timezone
 
-class Post(TimeStampMixin, BaseModel):
+class Post(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     content = models.TextField(_("Content"), max_length=1000)
+    slug = models.SlugField()
+    title = models.CharField(max_length=100, null=True, blank=True)
+    created_at = models.DateTimeField(_("Created time"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Updated time"), auto_now=True)
 
-    def is_liked_by_user(self,user):
-        return self.like_set.filter(user=user).exists()
+    def get_absolute_url(self):
+        return reverse('home:post_detail', args=(self.id, self.slug))
+
+    def likes_count(self):
+        return self.pvotes.count()
+
+    def user_can_like(self, user):
+        user_like = user.uvotes.filter(post=self)
+        if user_like.exists():
+            return True
+        return False
+
 
     class Meta:
         verbose_name = _('Post')
         verbose_name_plural = _("Posts")
+        ordering = ['-created_at']
 
     def __str__(self):
-        return f'{self.user.username} - {self.created_at}'
+        return f'{self.slug} - {self.updated}'
 
-class Comment(BaseModel, TimeStampMixin):
+class Comment(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     related_post = models.ForeignKey(Post, on_delete=models.CASCADE)
     content = models.TextField(_("Content"), max_length=500, blank=True, null=True)
     reply_to = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
+    is_reply = models.BooleanField(default=False)
+    created_at = models.DateTimeField(_("Created time"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Updated time"), auto_now=True)
 
     def get_user(self):
         return self.user
@@ -57,9 +75,9 @@ class Comment(BaseModel, TimeStampMixin):
         verbose_name_plural = _("Comments")
 
     def __str__(self):
-        return f'{self.user.username} - {self.related_post} - {self.content}'
+        return f'{self.user} - {self.body[:30]}'
 
-class Like(BaseModel, TimeStampMixin):
+class Like(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     related_post = models.ForeignKey(Post, on_delete=models.CASCADE)
 
@@ -84,15 +102,15 @@ class Like(BaseModel, TimeStampMixin):
         verbose_name_plural = _("Likes")
 
     def __str__(self):
-        return f'{self.user.username} - {self.related_post}'
+        return f'{self.user} liked {self.post.slug}'
 
 class PostImage(BaseModel):
     related_post = models.ForeignKey(Post, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='uploads/photos/')
 
     class Meta:
-        verbose_name = _('Like')
-        verbose_name_plural = _("Likes")
+        verbose_name = _('Image')
+        verbose_name_plural = _("Images")
 
     def __str__(self):
         return f'{self.related_post}'

@@ -37,10 +37,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "home",
-    "users",
-    "posts",
-    "core",
+    "home.apps.HomeConfig",
+    "users.apps.UsersConfig",
+    "posts.apps.PostsConfig",
+    "core.apps.CoreConfig",
 ]
 
 MIDDLEWARE = [
@@ -127,3 +127,19 @@ MEDIA_ROOT = BASE_DIR / "media/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTHETICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'account.authenticate.EmailBackend',
+]
+
+LOGIN_URL = '/users/login/'
+
+# Google account
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'mahshidvafaei08@gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_PASSWORD = 'pxjuuywzvlmfzlvm'
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'Mongard website'
