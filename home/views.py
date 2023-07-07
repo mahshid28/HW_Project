@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from posts.models import Post, Comment, Like
+from posts.models import Post, Comment, Like, PostImage, Tag
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from posts.forms import PostCreateUpdateForm, CommentCreateForm, CommentReplyForm, PostSearchForm
@@ -32,16 +32,14 @@ class PostDetailView(View):
 		can_like = False
 		if request.user.is_authenticated and self.post_instance.user_can_like(request.user):
 			can_like = True
+		post_images = self.post_instance.postimage_set.all()
 		return render(request, 'home/detail.html', {'post':self.post_instance, 'comments':comments, 'form':self.form_class, 'reply_form':self.form_class_reply, 'can_like':can_like})
 
 	@method_decorator(login_required)
 	def post(self, request, *args, **kwargs):
-		form = self.form_class(request.POST)
+		form = CommentCreateForm(request.POST)
 		if form.is_valid():
-			new_comment = form.save(commit=False)
-			new_comment.user = request.user
-			new_comment.post = self.post_instance
-			new_comment.save()
+			new_comment = form.save(user=request.user, post=self.post_instance)
 			messages.success(request, 'your comment submitted successfully', 'success')
 			return redirect('home:post_detail', self.post_instance.id, self.post_instance.slug)
 
@@ -78,14 +76,18 @@ class PostUpdateView(LoginRequiredMixin, View):
 
 	def post(self, request, *args, **kwargs):
 		post = self.post_instance
-		form = self.form_class(request.POST, instance=post)
+		form = self.form_class(request.POST, request.FILES, instance=post)
 		if form.is_valid():
 			new_post = form.save(commit=False)
 			new_post.slug = slugify(form.cleaned_data['content'][:30])
 			new_post.save()
+			if form.cleaned_data.get('image'):
+				for image in request.FILES.getlist('image'):
+					PostImage.objects.create(post=new_post, image=image)
 			messages.success(request, 'you updated this post', 'success')
 			return redirect('home:post_detail', post.id, post.slug)
-
+		else:
+			return render(request, 'home/update.html', {'form': form})
 
 class PostCreateView(LoginRequiredMixin, View):
 	form_class = PostCreateUpdateForm
@@ -95,7 +97,7 @@ class PostCreateView(LoginRequiredMixin, View):
 		return render(request, 'home/create.html', {'form':form})
 
 	def post(self, request, *args, **kwargs):
-		form = self.form_class(request.POST)
+		form = self.form_class(request.POST, request.FILES)
 		if form.is_valid():
 			new_post = form.save(commit=False)
 			new_post.slug = slugify(form.cleaned_data['content'][:30])
@@ -103,8 +105,7 @@ class PostCreateView(LoginRequiredMixin, View):
 			new_post.save()
 			if form.cleaned_data.get('image'):
 				for image in request.FILES.getlist('image'):
-					PostImage.objects.create(post=new_post, image=image)
-
+					PostImage.objects.create(related_post=new_post, image=image)
 			messages.success(request, 'you created a new post', 'success')
 			return redirect('home:post_detail', new_post.id, new_post.slug)
 		return render(request, 'home/create.html', {'form':form})
@@ -126,14 +127,32 @@ class PostAddReplyView(LoginRequiredMixin, View):
 			messages.success(request, 'your reply submitted successfully', 'success')
 		return redirect('home:post_detail', post.id, post.slug)
 
+@login_required
+def edit_comment(request, comment_id):
+	comment = Comment.objects.get(id=comment_id)
+
+	if request.method == 'POST':
+		new_content = request.POST.get('content')
+		try:
+			comment.edit_comment(request.user, new_content)
+			messages.success(request, 'Comment edited successfully.')
+		except (PermissionError, ValueError) as e:
+			messages.error(request, str(e))
+		return redirect('post-detail', post_id=comment.post.id)
+
+	context = {
+		'comment': comment
+	}
+	return render(request, 'edit_comment.html', context)
+
 
 class PostLikeView(LoginRequiredMixin, View):
 	def get(self, request, post_id):
 		post = get_object_or_404(Post, id=post_id)
-		like = Like.objects.filter(post=post, user=request.user)
+		like = Like.objects.filter(related_post=post, user=request.user)
 		if like.exists():
 			messages.error(request, 'you have already liked this post', 'danger')
 		else:
-			Like.objects.create(post=post, user=request.user)
+			Like.objects.create(related_post=post, user=request.user)
 			messages.success(request, 'you liked this post', 'success')
 		return redirect('home:post_detail', post.id, post.slug)

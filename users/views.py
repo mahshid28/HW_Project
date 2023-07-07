@@ -5,8 +5,9 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import views as auth_views
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from .models import Relation
 
 
@@ -82,6 +83,15 @@ class UserProfileView(LoginRequiredMixin, View):
 			is_following = True
 		return render(request, 'users/user.html', {'user':user, 'posts':posts, 'is_following':is_following})
 
+@login_required
+def delete_user(request, user_id):
+	user = get_object_or_404(User, pk=user_id, is_active=True)
+	if request.user.id == user_id:
+		user.is_active = False
+		user.save()
+		messages.success(request, 'User deleted successfully.', 'success')
+	return redirect('home:home')
+
 
 class UserPasswordResetView(auth_views.PasswordResetView):
 	template_name = 'users/password_reset_form.html'
@@ -109,7 +119,7 @@ class UserFollowView(LoginRequiredMixin, View):
 			return super().dispatch(request, *args, **kwargs)
 		else:
 			messages.error(request,'you cant follow/unfollow your account','danger')
-			return redirect('users:user_profile',user.id)
+			return redirect(reverse('users:user_profile', args=[user.id]))
 
 	def get(self, request, user_id):
 		user = User.objects.get(id=user_id)

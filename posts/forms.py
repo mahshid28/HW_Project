@@ -3,7 +3,7 @@ from .models import Post, Comment
 
 
 class PostCreateUpdateForm(forms.ModelForm):
-	image = forms.ImageField(required=False)
+	image = forms.ImageField()
 	class Meta:
 		model = Post
 		fields = ('content', 'image')
@@ -13,13 +13,19 @@ class PostCreateUpdateForm(forms.ModelForm):
 
 
 class CommentCreateForm(forms.ModelForm):
-	class Meta:
-		model = Comment
-		fields = ('content',)
-		widgets = {
-			'content': forms.Textarea(attrs={'class':'form-control'})
-		}
+    comment_id = forms.IntegerField(required=False, widget=forms.HiddenInput)
 
+    class Meta:
+        model = Comment
+        fields = ('content',)
+        widgets = {
+            'content': forms.Textarea(attrs={'class':'form-control'})
+        }
+
+    def save(self, user, post):
+        comment = Comment(related_post=post, user=user, content=self.cleaned_data['content'])
+        comment.save()
+        return comment
 
 class CommentReplyForm(forms.ModelForm):
 	class Meta:

@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from core.models import BaseModel
 from django.utils.translation import gettext as _
+from django.urls import reverse
 from django.utils import timezone
 
 class Post(BaseModel):
@@ -19,7 +20,7 @@ class Post(BaseModel):
         return self.pvotes.count()
 
     def user_can_like(self, user):
-        user_like = user.uvotes.filter(post=self)
+        user_like = user.uvotes.filter(related_post=self)
         if user_like.exists():
             return True
         return False
@@ -34,8 +35,8 @@ class Post(BaseModel):
         return f'{self.slug} - {self.updated}'
 
 class Comment(BaseModel):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    related_post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ucomments')
+    related_post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='pcomments')
     content = models.TextField(_("Content"), max_length=500, blank=True, null=True, help_text="share your opinion")
     reply_to = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
     is_reply = models.BooleanField(default=False)
@@ -75,11 +76,11 @@ class Comment(BaseModel):
         verbose_name_plural = _("Comments")
 
     def __str__(self):
-        return f'{self.user} - {self.body[:30]}'
+        return f'{self.user} - {self.content[:30]}'
 
 class Like(BaseModel):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    related_post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='uvotes')
+    related_post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='pvotes')
 
     def get_user(self):
         return self.user

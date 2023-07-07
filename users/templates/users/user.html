@@ -6,6 +6,7 @@
     {% if request.user.id == user.id %}
         <a href="{% url 'home:post_create' %}" class="btn btn-primary m-2">Create</a>
         <a href="{% url 'users:edit_user' %}" class="btn btn-info m-2">Edit Profile</a>
+        <a href="{% url 'users:delete_user' user.id %}" class="btn btn-danger m-2">Delete Profile</a>
     {% endif %}
 
     {% if request.user.id != user.id and not is_following %}
@@ -16,7 +17,7 @@
 
     <div class="card">
         {% for post in posts %}
-            <a href="{{ post.get_absolute_url }}" class="card-body">{{ post.body|truncatewords:8 }}</a>
+            <a href="{{ post.get_absolute_url }}" class="card-body">{{ post.content|truncatewords:8 }}</a>
         {% endfor %}
     </div>
 {% endblock %}

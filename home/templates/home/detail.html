@@ -8,7 +8,10 @@
     {% endif %}
 
     <p><a href="{% url 'users:user_profile' post.user.id %}">{{ post.user.username }}</a> - {{ post.updated|date:"Y-M" }}</p>
-    <p>{{ post.body }}</p><hr/>
+    <div class="card">
+        <img class="slide-item" src="media/uploads/photos/DSC_6768_97qZmyr.jpg" alt="post image">
+    </div>
+    <p>{{ post.content }}</p><hr/>
 
     {% if request.user.is_authenticated %}
 
@@ -26,7 +29,10 @@
     {% for comment in comments %}
         <div class="card bg-dark text-white">
             <p class="card-header">{{ comment.user }} | {{ comment.created|timesince }}</p>
-            <p class="card-body">{{ comment.body }}</p>
+            <p class="card-body">{{ comment.content }}</p>
+            {% if request.user == comment.user %}
+                <a href="{% url 'home:edit-comment' comment.id %}" class="btn btn-secondary">Edit</a>
+            {% endif %}
 
             {% if request.user.is_authenticated %}
                 <form action="{% url 'home:add_reply' post.id comment.id %}" method="post" style="display:none;">
@@ -38,7 +44,7 @@
 
             {% with replies=comment.rcomments.all %}
                 {% for reply in replies %}
-                    <p class="bg-primary p-3 m-2">{{ reply.user }} <br/> {{ reply.body }}</p>
+                    <p class="bg-primary p-3 m-2">{{ reply.user }} <br/> {{ reply.content }}</p>
                 {% endfor %}
             {% endwith %}
         </div><br/>
